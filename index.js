@@ -3,9 +3,10 @@
 
 class Controller {
 
-    constructor(renderer, stack) {
+    constructor(renderer, stack, executor) {
         this.renderer = renderer;
         this.stack = stack;
+        this.executor = executor;
     }
 
 
@@ -16,23 +17,23 @@ class Controller {
 
         document.getElementById('result').addEventListener('click', () => {
             this.calculateResult();
-            executor.run();
+            const answer = this.executor.run();
+            this.renderer.writeAnswer(answer);
         });
 
         document.getElementById('show').addEventListener('click', () => {
-            renderer.showStack();
+            this.renderer.showStack();
             });
 
         document.getElementById('clear').addEventListener('click', () => {
-            stack.clearStack();
+            this.stack.clearStack();
         });
     }
 
     addToStack() { //handler input button
         const value = this.renderer.getOperandValue();
         this.stack.pushValue(value);
-        document.getElementById('inputValue').value = ''; //clear input field after press button
-        
+        this.renderer.clearValueField();      
     }
 
     calculateResult() {  //handler result button
@@ -44,6 +45,9 @@ class Controller {
 
 
 class Renderer {
+    constructor (stack) {
+        this.stack = stack;
+    }
 
     getOperandValue() {  // get value from input field
         return document.getElementById('inputValue').value;
@@ -54,9 +58,17 @@ class Renderer {
     }
 
     showStack() {    // show, what you have in stack now (in console)
-        console.log('values =', stack.values);
-        console.log('operation', stack.operation);
+        console.log('values =', this.stack.values);
+        console.log('operation', this.stack.operation);
         }
+
+    clearOperationField() {
+        document.getElementById('operation').value = ''; //clear operation field after press button
+    }
+
+    clearValueField() {
+        document.getElementById('inputValue').value = ''; //clear input field after press button
+    }
 
     writeAnswer(answer) {
         const innerText = document.getElementById('innerText');
@@ -82,66 +94,75 @@ class Stack {
         this.values = [];
         this.operation = '';
         console.log('stack is clear!');
-        document.getElementById('operation').value = ''; //clear operation field after press button
+        renderer.clearOperationField();
         }
 
     popValue() {
         return this.values;
     }
+
+    popOperation() {
+        return this.operation;
+    }
 }
 
 
 class CommandExecutor {
+    constructor (stack, commandfactory) {
+        this.stack = stack;
+        this.commandfactory = commandfactory;
+    }
 
     run() { 
-        switch(stack.operation) {
-            case 'mul': multiplication.mul();
-            break;
-
-            case 'add': addiction.add();
-            break;
-
-            default: this.invalidOperation();
+        const operation = this.stack.popOperation();
+        const operands = this.stack.popValue();
+        const command = this.commandfactory.getCommandByOperation(operation);
+        if (command == undefined) {
+           return 'invalid operation';
         }
-
-    }   
-    
-    invalidOperation() {
-        const answer = 'invalid operation';
-        renderer.writeAnswer(answer);
+        return command.exec(operands);        
     }
 }
 
-class Multiplication {
 
-    mul() {
+class MulCommand {
+    exec(operands) {
         let answer = 1;
-        const mass = stack.popValue();
-        mass.forEach((item) => answer *= item);
-        renderer.writeAnswer(answer);
-    }
+        operands.forEach((item) => answer *= item);
+        return answer;
+    };
+}
+ 
+    
+class AddCommand {
+    exec(operands) {
+        let answer = 0;
+        operands.forEach((item) => answer += item);
+        return answer;
+    };
 }
 
-class Addiction {
 
-    add(){
-        let answer = 0;
-        const mass = stack.popValue();
-        mass.forEach((item) => answer += item);
-        renderer.writeAnswer(answer);
+class CommandFactory {
+
+    commands = {
+        'add': new AddCommand(),
+        'mul': new MulCommand()
+    }
+
+    getCommandByOperation(operation) {
+        return this.commands[operation];
     }
 }
 
 
 const stack = new Stack();
-const renderer = new Renderer();
-const controller = new Controller(renderer, stack);
-const executor = new CommandExecutor();
-const multiplication = new Multiplication();
-const addiction = new Addiction();
+const renderer = new Renderer(stack);
+const commandfactory = new CommandFactory();
+const executor = new CommandExecutor(stack, commandfactory);
+const controller = new Controller(renderer, stack, executor);
 
 controller.init();
-
 
 
 
