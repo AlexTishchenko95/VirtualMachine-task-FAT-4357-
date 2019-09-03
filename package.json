@@ -1,0 +1,28 @@
+{
+  "name": "virtual_machine",
+  "version": "1.0.0",
+  "description": "creating virtual machine",
+  "main": "app.js",
+  "dependencies": {
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.0.6",
+    "prettier": "^1.18.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexTishchenko95/VirtualMachine-task-FAT-4357-.git"
+  },
+  "author": "Alex Tichenko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexTishchenko95/VirtualMachine-task-FAT-4357-/issues"
+  },
+  "homepage": "https://github.com/AlexTishchenko95/VirtualMachine-task-FAT-4357-#readme"
+}
