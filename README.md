@@ -11,3 +11,7 @@ working with webpack
 install pretier
 
 ---
+
+### testing
+
+used unit-tests with jasmine-karma
